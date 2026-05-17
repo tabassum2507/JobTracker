@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../api';
@@ -7,13 +7,29 @@ import KanbanBoard from '../components/KanbanBoard';
 import JobForm from '../components/JobForm';
 import AIPanel from '../components/AIPanel';
 
+const STATUSES = [
+  { value: 'saved',        label: 'Saved',        dot: 'bg-gray-400'    },
+  { value: 'applied',      label: 'Applied',       dot: 'bg-blue-500'    },
+  { value: 'phone_screen', label: 'Phone Screen',  dot: 'bg-yellow-500'  },
+  { value: 'interview',    label: 'Interview',     dot: 'bg-purple-500'  },
+  { value: 'offer',        label: 'Offer',         dot: 'bg-emerald-500' },
+  { value: 'rejected',     label: 'Rejected',      dot: 'bg-red-500'     },
+  { value: 'ghosted',      label: 'Ghosted',       dot: 'bg-orange-400'  },
+];
+
 export default function Dashboard() {
-  const [jobs, setJobs] = useState([]);
+  const [jobs, setJobs]       = useState([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
-  const [editJob, setEditJob] = useState(null);
-  const [aiOpen, setAiOpen] = useState(false);
-  const [aiJob, setAiJob] = useState(null);
+  const [editJob, setEditJob]   = useState(null);
+  const [aiOpen, setAiOpen]   = useState(false);
+  const [aiJob, setAiJob]     = useState(null);
+
+  // Filters
+  const [search, setSearch]           = useState('');
+  const [activeStatus, setActiveStatus] = useState('');   // '' = all
+  const [activeSource, setActiveSource] = useState('');   // '' = all
+
   const navigate = useNavigate();
 
   const fetchJobs = useCallback(async () => {
@@ -28,6 +44,25 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => { fetchJobs(); }, [fetchJobs]);
+
+  // Unique sources from existing jobs for the source filter
+  const sources = useMemo(() => (
+    [...new Set(jobs.map((j) => j.jobSource).filter(Boolean))]
+  ), [jobs]);
+
+  // Filtered jobs passed to board
+  const filteredJobs = useMemo(() => jobs.filter((j) => {
+    const q = search.toLowerCase();
+    const matchSearch = !q ||
+      j.company.toLowerCase().includes(q) ||
+      j.role.toLowerCase().includes(q);
+    const matchStatus = !activeStatus || j.status === activeStatus;
+    const matchSource = !activeSource || j.jobSource === activeSource;
+    return matchSearch && matchStatus && matchSource;
+  }), [jobs, search, activeStatus, activeSource]);
+
+  const hasFilters = search || activeStatus || activeSource;
+  const clearFilters = () => { setSearch(''); setActiveStatus(''); setActiveSource(''); };
 
   const handleAddJob   = () => { setEditJob(null); setFormOpen(true); };
   const handleEdit     = (job) => { setEditJob(job); setFormOpen(true); };
@@ -46,15 +81,14 @@ export default function Dashboard() {
         backgroundSize: '48px 48px',
       }}
     >
-
       {/* ── Navbar ── */}
       <header className="bg-white border-b border-gray-200 shadow-sm px-6 h-14 flex items-center justify-between sticky top-0 z-30">
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </div>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
           <span className="font-display italic text-lg font-bold text-gray-900">JobTracker</span>
         </div>
 
@@ -79,12 +113,10 @@ export default function Dashboard() {
             <span>Add Job</span>
           </button>
 
-          <button
-            onClick={handleLogout}
-            title="Logout"
+          <button onClick={handleLogout} title="Logout"
             className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition"
           >
-            <svg className="w-4.5 h-4.5 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
           </button>
@@ -97,11 +129,70 @@ export default function Dashboard() {
         {/* Stats */}
         <StatsBar jobs={jobs} />
 
-        {/* Section label */}
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-            Pipeline · {jobs.length} job{jobs.length !== 1 ? 's' : ''}
-          </h2>
+        {/* ── Filter bar ── */}
+        <div className="bg-white/70 backdrop-blur-sm border border-gray-200 rounded-2xl px-4 py-3 flex flex-wrap items-center gap-3 shadow-sm">
+
+          {/* Search */}
+          <div className="relative flex-1 min-w-[180px]">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search company or role…"
+              className="w-full pl-9 pr-3 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
+            />
+          </div>
+
+          {/* Status chips */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {STATUSES.map(({ value, label, dot }) => (
+              <button
+                key={value}
+                onClick={() => setActiveStatus(activeStatus === value ? '' : value)}
+                className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-all ${
+                  activeStatus === value
+                    ? 'bg-gray-900 text-white border-gray-900'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
+                }`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${activeStatus === value ? 'bg-white' : dot}`} />
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Source dropdown */}
+          {sources.length > 0 && (
+            <select
+              value={activeSource}
+              onChange={(e) => setActiveSource(e.target.value)}
+              className="text-xs border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+            >
+              <option value="">All sources</option>
+              {sources.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          )}
+
+          {/* Result count + clear */}
+          <div className="flex items-center gap-2 ml-auto shrink-0">
+            <span className="text-xs text-gray-400 whitespace-nowrap">
+              {filteredJobs.length} / {jobs.length} jobs
+            </span>
+            {hasFilters && (
+              <button
+                onClick={clearFilters}
+                className="text-xs text-red-500 hover:text-red-700 font-medium flex items-center gap-1 transition"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Clear
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Board */}
@@ -136,7 +227,7 @@ export default function Dashboard() {
           </div>
         ) : (
           <KanbanBoard
-            jobs={jobs}
+            jobs={filteredJobs}
             onEdit={handleEdit}
             onDelete={handleDelete}
             onAI={handleAI}
@@ -144,12 +235,8 @@ export default function Dashboard() {
         )}
       </main>
 
-      {formOpen && (
-        <JobForm job={editJob} onClose={() => setFormOpen(false)} onSave={handleSave} />
-      )}
-      {aiOpen && (
-        <AIPanel job={aiJob} allJobs={jobs} onClose={() => setAiOpen(false)} />
-      )}
+      {formOpen && <JobForm job={editJob} onClose={() => setFormOpen(false)} onSave={handleSave} />}
+      {aiOpen   && <AIPanel job={aiJob} allJobs={jobs} onClose={() => setAiOpen(false)} />}
     </div>
   );
 }
