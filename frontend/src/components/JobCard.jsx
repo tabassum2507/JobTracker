@@ -26,6 +26,22 @@ function SparkleIcon() {
   );
 }
 
+function Highlight({ text, query }) {
+  if (!query || !text) return <>{text}</>;
+  const lower = text.toLowerCase();
+  const idx = lower.indexOf(query.toLowerCase());
+  if (idx === -1) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark className="bg-yellow-200 text-yellow-900 rounded-sm not-italic px-0.5">
+        {text.slice(idx, idx + query.length)}
+      </mark>
+      {text.slice(idx + query.length)}
+    </>
+  );
+}
+
 function Row({ icon, label, children }) {
   return (
     <span className="flex items-center gap-1.5 text-[11px] text-gray-600">
@@ -38,7 +54,7 @@ function Row({ icon, label, children }) {
   );
 }
 
-export default function JobCard({ job, onEdit, onDelete, onAI }) {
+export default function JobCard({ job, onEdit, onDelete, onAI, search = '' }) {
   const [hovered, setHovered] = useState(false);
 
   const handleDelete = async () => {
@@ -75,8 +91,12 @@ export default function JobCard({ job, onEdit, onDelete, onAI }) {
 
       {/* Company + Role */}
       <div className="pt-1">
-        <p className="font-bold text-gray-800 text-sm leading-tight">{job.company}</p>
-        <p className="text-xs text-gray-500 mt-0.5">{job.role}</p>
+        <p className="font-bold text-gray-800 text-sm leading-tight">
+          <Highlight text={job.company} query={search} />
+        </p>
+        <p className="text-xs text-gray-500 mt-0.5">
+          <Highlight text={job.role} query={search} />
+        </p>
       </div>
 
       {/* Meta */}
@@ -88,7 +108,7 @@ export default function JobCard({ job, onEdit, onDelete, onAI }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           }>
-            {job.location}
+            <Highlight text={job.location} query={search} />
           </Row>
         )}
         {job.salary && (
@@ -115,7 +135,7 @@ export default function JobCard({ job, onEdit, onDelete, onAI }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
             </svg>
           } label="Via">
-            {job.jobSource}
+            <Highlight text={job.jobSource} query={search} />
           </Row>
         )}
         {job.appliedAt && (

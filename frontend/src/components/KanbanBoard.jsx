@@ -10,7 +10,7 @@ const COLUMNS = [
   { status: 'ghosted',      label: 'Ghosted',       dot: 'bg-orange-400' },
 ];
 
-export default function KanbanBoard({ jobs, onEdit, onDelete, onAI }) {
+export default function KanbanBoard({ jobs, onEdit, onDelete, onAI, search }) {
   return (
     <div className="flex gap-3 overflow-x-auto pb-4 -mx-1 px-1">
       {COLUMNS.map(({ status, label, dot }) => {
@@ -46,6 +46,7 @@ export default function KanbanBoard({ jobs, onEdit, onDelete, onAI }) {
                     onEdit={onEdit}
                     onDelete={onDelete}
                     onAI={onAI}
+                    search={search}
                   />
                 ))
               )}

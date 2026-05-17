@@ -55,7 +55,10 @@ export default function Dashboard() {
     const q = search.toLowerCase();
     const matchSearch = !q ||
       j.company.toLowerCase().includes(q) ||
-      j.role.toLowerCase().includes(q);
+      j.role.toLowerCase().includes(q) ||
+      (j.location   && j.location.toLowerCase().includes(q)) ||
+      (j.jobSource  && j.jobSource.toLowerCase().includes(q)) ||
+      (j.notes      && j.notes.toLowerCase().includes(q));
     const matchStatus = !activeStatus || j.status === activeStatus;
     const matchSource = !activeSource || j.jobSource === activeSource;
     return matchSearch && matchStatus && matchSource;
@@ -231,6 +234,7 @@ export default function Dashboard() {
             onEdit={handleEdit}
             onDelete={handleDelete}
             onAI={handleAI}
+            search={search}
           />
         )}
       </main>
