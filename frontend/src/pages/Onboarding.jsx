@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../api';
@@ -15,6 +15,7 @@ const EXPERIENCE_OPTIONS = [
 export default function Onboarding() {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
     name: '',
     currentRole: '',
@@ -22,6 +23,23 @@ export default function Onboarding() {
     skills: '',
     bio: '',
   });
+
+  useEffect(() => {
+    api.get('/api/profile')
+      .then(({ data }) => {
+        if (data && Object.keys(data).length > 0) {
+          setForm({
+            name:        data.name        || '',
+            currentRole: data.currentRole || '',
+            experience:  data.experience  || '',
+            skills:      data.skills      || '',
+            bio:         data.bio         || '',
+          });
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
@@ -70,7 +88,7 @@ export default function Onboarding() {
           <div className="mb-8 text-center">
             <div className="inline-flex items-center gap-2 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1.5 rounded-full mb-4">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-              Step 2 of 2 — Quick profile setup
+              {loading ? 'Loading…' : 'AI Profile — powers your cover letters'}
             </div>
             <h1 className="font-display italic text-3xl font-bold text-gray-900">
               Tell us about yourself
@@ -82,6 +100,14 @@ export default function Onboarding() {
 
           <div className="relative">
             <div className="absolute -inset-3 bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400 rounded-3xl opacity-15 blur-2xl pointer-events-none" />
+            {loading ? (
+              <div className="relative bg-white rounded-2xl shadow-xl border border-gray-200/60 p-8 flex items-center justify-center h-64">
+                <svg className="animate-spin w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                </svg>
+              </div>
+            ) : (
             <form
               onSubmit={handleSubmit}
               className="relative bg-white rounded-2xl shadow-xl border border-gray-200/60 p-8 space-y-5"
@@ -169,6 +195,7 @@ export default function Onboarding() {
                 {saving ? 'Saving…' : 'Save & go to dashboard →'}
               </button>
             </form>
+            )}
           </div>
         </div>
       </main>
