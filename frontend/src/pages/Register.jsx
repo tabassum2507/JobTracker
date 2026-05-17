@@ -49,7 +49,7 @@ export default function Register() {
       <nav className="flex items-center justify-between px-8 py-5">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center text-white text-sm">💼</div>
-          <span className="font-display italic font-bold text-gray-900 text-lg">JobTracker</span>
+          <span className="font-display italic font-bold text-gray-900 text-lg">Trackfolio</span>
         </div>
         <Link
           to="/login"
@@ -77,7 +77,7 @@ export default function Register() {
                 <span className="text-violet-600">Get organised.</span>
               </h1>
               <p className="mt-5 text-gray-500 text-lg leading-relaxed max-w-md">
-                Whether you're a fresher or a seasoned professional, JobTracker helps you manage
+                Whether you're a fresher or a seasoned professional, Trackfolio helps you manage
                 every application — from Naukri to campus placements — in one clean board.
               </p>
             </div>

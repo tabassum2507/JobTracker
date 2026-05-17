@@ -46,7 +46,7 @@ export default function Login() {
       <nav className="flex items-center justify-between px-8 py-5">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center text-white text-sm">💼</div>
-          <span className="font-display italic font-bold text-gray-900 text-lg">JobTracker</span>
+          <span className="font-display italic font-bold text-gray-900 text-lg">Trackfolio</span>
         </div>
         <Link
           to="/register"
