@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import Groq from 'groq-sdk';
 import verifyToken from '../middleware/verifyToken.js';
+import User from '../models/User.js';
 
 const router = Router();
 router.use(verifyToken);
@@ -19,13 +20,26 @@ async function chat(systemPrompt, userMessage) {
   return response.choices[0].message.content;
 }
 
+async function getCandidateContext(userId) {
+  const user = await User.findById(userId).select('profile');
+  const p = user?.profile || {};
+  return [
+    p.name        && `Candidate name: ${p.name}`,
+    p.currentRole && `Current/last role: ${p.currentRole}`,
+    p.experience  && `Experience level: ${p.experience}`,
+    p.skills      && `Key skills: ${p.skills}`,
+    p.bio         && `About the candidate: ${p.bio}`,
+  ].filter(Boolean).join('\n');
+}
+
 // POST /api/ai/cover-letter
 router.post('/cover-letter', async (req, res) => {
   const { company, role, notes } = req.body;
   try {
+    const candidate = await getCandidateContext(req.user.userId);
     const result = await chat(
-      'You are an expert career coach. Write a concise, compelling, personalized cover letter in 3 short paragraphs. Be specific to the role and company.',
-      `Company: ${company}\nRole: ${role}\nJob notes: ${notes}\nWrite a cover letter for this job.`
+      'You are an expert career coach writing for the Indian job market. Write a concise, compelling, personalized cover letter in 3 short paragraphs. Address it to the Hiring Manager. Be specific to the role and company. Use the candidate profile to make it personal.',
+      `${candidate ? candidate + '\n\n' : ''}Company: ${company}\nRole: ${role}\nJob notes: ${notes}\n\nWrite a cover letter.`
     );
     res.json({ result });
   } catch (err) {
@@ -37,9 +51,10 @@ router.post('/cover-letter', async (req, res) => {
 router.post('/interview-prep', async (req, res) => {
   const { company, role, notes } = req.body;
   try {
+    const candidate = await getCandidateContext(req.user.userId);
     const result = await chat(
-      'You are an expert interview coach. Generate exactly 10 likely interview questions for this role with a concise ideal answer for each. Format as numbered list: Question then Answer.',
-      `Company: ${company}\nRole: ${role}\nNotes: ${notes}`
+      'You are an expert interview coach. Generate exactly 10 likely interview questions for this role with a concise ideal answer for each. Tailor answers to the candidate\'s background if provided. Format as numbered list: Question then Answer.',
+      `${candidate ? candidate + '\n\n' : ''}Company: ${company}\nRole: ${role}\nNotes: ${notes}`
     );
     res.json({ result });
   } catch (err) {

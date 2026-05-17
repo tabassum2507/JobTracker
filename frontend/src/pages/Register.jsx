@@ -27,7 +27,7 @@ export default function Register() {
     try {
       const { data } = await api.post('/api/auth/register', { email, password });
       localStorage.setItem('token', data.token);
-      navigate('/dashboard');
+      navigate('/onboarding');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
     } finally {
