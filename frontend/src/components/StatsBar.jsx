@@ -1,41 +1,10 @@
 const CARDS = [
-  {
-    key: 'totalApplied',
-    label: 'Applied',
-    color: 'bg-blue-50 text-blue-700 border-blue-100',
-    numColor: 'text-blue-700',
-  },
-  {
-    key: 'interviews',
-    label: 'Interviews',
-    color: 'bg-purple-50 text-purple-700 border-purple-100',
-    numColor: 'text-purple-700',
-  },
-  {
-    key: 'offers',
-    label: 'Offers',
-    color: 'bg-green-50 text-green-700 border-green-100',
-    numColor: 'text-green-700',
-  },
-  {
-    key: 'rejected',
-    label: 'Rejected',
-    color: 'bg-red-50 text-red-700 border-red-100',
-    numColor: 'text-red-700',
-  },
-  {
-    key: 'ghosted',
-    label: 'Ghosted',
-    color: 'bg-orange-50 text-orange-700 border-orange-100',
-    numColor: 'text-orange-700',
-  },
-  {
-    key: 'responseRate',
-    label: 'Response Rate',
-    color: 'bg-teal-50 text-teal-700 border-teal-100',
-    numColor: 'text-teal-700',
-    suffix: '%',
-  },
+  { key: 'totalApplied', label: 'Total Applied',  accent: 'border-l-blue-400',    num: 'text-blue-600'    },
+  { key: 'interviews',   label: 'Interviews',      accent: 'border-l-purple-400',  num: 'text-purple-600'  },
+  { key: 'offers',       label: 'Offers',          accent: 'border-l-emerald-400', num: 'text-emerald-600' },
+  { key: 'rejected',     label: 'Rejected',        accent: 'border-l-red-400',     num: 'text-red-500'     },
+  { key: 'ghosted',      label: 'Ghosted',         accent: 'border-l-orange-400',  num: 'text-orange-500'  },
+  { key: 'responseRate', label: 'Response Rate',   accent: 'border-l-teal-400',    num: 'text-teal-600', suffix: '%' },
 ];
 
 export default function StatsBar({ jobs }) {
@@ -53,15 +22,15 @@ export default function StatsBar({ jobs }) {
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-      {CARDS.map(({ key, label, color, numColor, suffix = '' }) => (
+      {CARDS.map(({ key, label, accent, num, suffix = '' }) => (
         <div
           key={key}
-          className={`rounded-xl border px-4 py-3 flex flex-col gap-1 ${color}`}
+          className={`bg-white rounded-xl border border-gray-100 border-l-4 ${accent} px-4 py-3.5 flex flex-col gap-1 shadow-sm hover:shadow-md transition-shadow`}
         >
-          <span className={`text-2xl font-bold leading-none ${numColor}`}>
+          <p className={`text-2xl font-bold leading-none ${num}`}>
             {stats[key]}{suffix}
-          </span>
-          <span className="text-xs font-medium opacity-80">{label}</span>
+          </p>
+          <p className="text-xs text-gray-400 font-medium mt-1">{label}</p>
         </div>
       ))}
     </div>
