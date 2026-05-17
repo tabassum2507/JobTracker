@@ -3,6 +3,7 @@
 backend/.env
 frontend/.env
 frontend/.env.local
+.env.example
 
 # Dependencies
 node_modules/
