@@ -76,4 +76,19 @@ router.post('/insights', async (req, res) => {
   }
 });
 
+// POST /api/ai/cold-email
+router.post('/cold-email', async (req, res) => {
+  const { company, role, notes } = req.body;
+  try {
+    const candidate = await getCandidateContext(req.user.userId);
+    const result = await chat(
+      'You are an expert at writing cold outreach messages for job seekers in the Indian job market. Write a short, genuine cold email or LinkedIn message (60–90 words) to a recruiter or hiring manager at the target company. It should feel personal and human — not templated. Include a clear reason for reaching out, a one-line value pitch based on the candidate\'s background, and a soft call to action. No subject line needed.',
+      `${candidate ? candidate + '\n\n' : ''}Company: ${company}\nRole: ${role}\nJob notes: ${notes}\n\nWrite a cold outreach message.`
+    );
+    res.json({ result });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 export default router;

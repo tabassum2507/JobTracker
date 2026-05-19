@@ -4,6 +4,7 @@ import api from '../api';
 
 const ALL_TABS = [
   { id: 'cover-letter',   label: 'Cover Letter' },
+  { id: 'cold-email',     label: 'Cold Email' },
   { id: 'interview-prep', label: 'Interview Prep' },
   { id: 'insights',       label: 'Insights' },
 ];
@@ -20,9 +21,10 @@ function Spinner() {
 }
 
 const GENERATE_LABELS = {
-  'cover-letter':   ['Generate Cover Letter',     'Regenerate Cover Letter'],
+  'cover-letter':   ['Generate Cover Letter',      'Regenerate Cover Letter'],
+  'cold-email':     ['Write Cold Message',         'Rewrite Cold Message'],
   'interview-prep': ['Generate Interview Questions','Regenerate Questions'],
-  insights:         ['Analyze My Job Search',      'Re-analyze'],
+  insights:         ['Analyze My Job Search',       'Re-analyze'],
 };
 
 export default function AIPanel({ job, allJobs, onClose }) {
@@ -31,6 +33,7 @@ export default function AIPanel({ job, allJobs, onClose }) {
   const [activeTab, setActiveTab] = useState(tabs[0].id);
   const [tabState, setTabState] = useState({
     'cover-letter':   { ...INITIAL_TAB_STATE },
+    'cold-email':     { ...INITIAL_TAB_STATE },
     'interview-prep': { ...INITIAL_TAB_STATE },
     insights:         { ...INITIAL_TAB_STATE },
   });
@@ -49,15 +52,15 @@ export default function AIPanel({ job, allJobs, onClose }) {
       let data;
       if (tab === 'cover-letter') {
         ({ data } = await api.post('/api/ai/cover-letter', {
-          company: job.company,
-          role:    job.role,
-          notes:   job.notes || '',
+          company: job.company, role: job.role, notes: job.notes || '',
+        }));
+      } else if (tab === 'cold-email') {
+        ({ data } = await api.post('/api/ai/cold-email', {
+          company: job.company, role: job.role, notes: job.notes || '',
         }));
       } else if (tab === 'interview-prep') {
         ({ data } = await api.post('/api/ai/interview-prep', {
-          company: job.company,
-          role:    job.role,
-          notes:   job.notes || '',
+          company: job.company, role: job.role, notes: job.notes || '',
         }));
       } else {
         ({ data } = await api.post('/api/ai/insights', { jobs: allJobs }));
@@ -70,7 +73,7 @@ export default function AIPanel({ job, allJobs, onClose }) {
   };
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(tabState['cover-letter'].result);
+    await navigator.clipboard.writeText(result);
     toast.success('Copied!');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -138,13 +141,13 @@ export default function AIPanel({ job, allJobs, onClose }) {
             </div>
           )}
 
-          {/* Result: Cover Letter — readonly textarea + copy */}
-          {!loading && result && activeTab === 'cover-letter' && (
+          {/* Result: Cover Letter / Cold Email — readonly textarea + copy */}
+          {!loading && result && (activeTab === 'cover-letter' || activeTab === 'cold-email') && (
             <div className="flex flex-col gap-2">
               <textarea
                 readOnly
                 value={result}
-                rows={14}
+                rows={activeTab === 'cold-email' ? 7 : 14}
                 className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-700 bg-gray-50 resize-none focus:outline-none leading-relaxed"
               />
               <button
@@ -157,7 +160,7 @@ export default function AIPanel({ job, allJobs, onClose }) {
           )}
 
           {/* Result: Interview Prep / Insights — pre-wrap text */}
-          {!loading && result && activeTab !== 'cover-letter' && (
+          {!loading && result && activeTab !== 'cover-letter' && activeTab !== 'cold-email' && (
             <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
               {result}
             </div>
