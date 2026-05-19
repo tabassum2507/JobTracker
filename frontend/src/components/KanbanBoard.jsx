@@ -2,7 +2,7 @@ import JobCard from './JobCard';
 
 const COLUMNS = [
   { status: 'saved',        label: 'Saved',        dot: 'bg-gray-400'   },
-  { status: 'cold_email',   label: 'Cold Email',   dot: 'bg-cyan-500'   },
+  { status: 'cold_email',   label: 'Cold Email',   dot: 'bg-pink-500'   },
   { status: 'applied',      label: 'Applied',       dot: 'bg-blue-500'   },
   { status: 'phone_screen', label: 'Phone Screen',  dot: 'bg-yellow-500' },
   { status: 'interview',    label: 'Interview',     dot: 'bg-purple-500' },

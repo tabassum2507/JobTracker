@@ -5,7 +5,7 @@ import api from '../api';
 // Each status gets a pastel paper colour + a slight resting rotation
 const STATUS_NOTE = {
   saved:        { bg: '#fef9c3', rot: -1.2 },
-  cold_email:   { bg: '#cffafe', rot:  0.5 },
+  cold_email:   { bg: '#fce7f3', rot:  0.5 },
   applied:      { bg: '#dbeafe', rot:  0.8 },
   phone_screen: { bg: '#fed7aa', rot: -0.6 },
   interview:    { bg: '#ede9fe', rot:  1.2 },
