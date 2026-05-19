@@ -4,6 +4,7 @@ import api from '../api';
 
 const STATUS_OPTIONS = [
   { value: 'saved',        label: 'Saved' },
+  { value: 'cold_email',   label: 'Cold Email' },
   { value: 'applied',      label: 'Applied' },
   { value: 'phone_screen', label: 'Phone Screen' },
   { value: 'interview',    label: 'Interview' },

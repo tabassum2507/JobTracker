@@ -9,6 +9,7 @@ import AIPanel from '../components/AIPanel';
 
 const STATUSES = [
   { value: 'saved',        label: 'Saved',        dot: 'bg-gray-400'    },
+  { value: 'cold_email',   label: 'Cold Email',   dot: 'bg-cyan-500'    },
   { value: 'applied',      label: 'Applied',       dot: 'bg-blue-500'    },
   { value: 'phone_screen', label: 'Phone Screen',  dot: 'bg-yellow-500'  },
   { value: 'interview',    label: 'Interview',     dot: 'bg-purple-500'  },
